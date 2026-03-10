@@ -11,7 +11,7 @@ import { MusicPlayer } from './components/MusicPlayer';
 import { QuoteDisplay } from './components/QuoteDisplay';
 import { Clock } from './components/Clock';
 import { PlanningDashboard } from './components/PlanningDashboard';
-import { CLASSIC_ART_COLLECTION } from './constants';
+import { LANDSCAPE_COLLECTION } from './constants';
 import { Maximize2, Minimize2, Palette, LayoutDashboard, Target } from 'lucide-react';
 
 type AppMode = 'focus' | 'planning';
@@ -26,10 +26,10 @@ export default function App() {
   const nextArt = () => {
     setArtLoading(true);
     setArtError(false);
-    setArtIndex((prev) => (prev + 1) % CLASSIC_ART_COLLECTION.length);
+    setArtIndex((prev) => (prev + 1) % LANDSCAPE_COLLECTION.length);
   };
 
-  const currentArt = CLASSIC_ART_COLLECTION[artIndex];
+  const currentArt = LANDSCAPE_COLLECTION[artIndex];
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-black font-sans selection:bg-white selection:text-black">
@@ -76,9 +76,9 @@ export default function App() {
             <div className="flex items-center gap-2 mt-2">
               <span className="text-[10px] uppercase tracking-widest text-white/40 font-bold">Background</span>
               <span className="text-[10px] uppercase tracking-widest text-white/80 font-bold">
-                {artError ? "Art Load Failed" : currentArt.title}
+                {artError ? "View Load Failed" : currentArt.title}
               </span>
-              {!artError && <span className="text-[10px] text-white/20 ml-2">— {currentArt.artist}</span>}
+              {!artError && <span className="text-[10px] text-white/20 ml-2">— {currentArt.location}</span>}
               {artLoading && <span className="w-2 h-2 rounded-full bg-white/20 animate-pulse ml-2" />}
             </div>
           </div>
@@ -140,7 +140,7 @@ export default function App() {
               className="group flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 rounded-full transition-all"
             >
               <Palette className="w-4 h-4 text-white/60 group-hover:text-white" />
-              <span className="text-[10px] uppercase tracking-widest text-white/60 group-hover:text-white font-bold">Change Art</span>
+              <span className="text-[10px] uppercase tracking-widest text-white/60 group-hover:text-white font-bold">Change View</span>
             </button>
 
             <div className="flex bg-white/5 backdrop-blur-md border border-white/10 rounded-full p-1">

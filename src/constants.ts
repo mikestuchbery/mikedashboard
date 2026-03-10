@@ -15,32 +15,30 @@ export interface Quote {
 
 export type TimerMode = 'focus' | 'shortBreak' | 'longBreak';
 
-export const CLASSIC_ART_COLLECTION = [
+export const LANDSCAPE_COLLECTION = [
   {
-    url: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=2000&auto=format&fit=crop",
-    title: "The Milkmaid",
-    artist: "Johannes Vermeer"
+    url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2000&auto=format&fit=crop",
+    title: "Mountain Peaks",
+    location: "Alps"
   },
   {
-    url: "https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?q=80&w=2000&auto=format&fit=crop",
-    title: "Self-Portrait",
-    artist: "Vincent van Gogh"
+    url: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2000&auto=format&fit=crop",
+    title: "Sunlit Forest",
+    location: "Pacific Northwest"
   },
   {
-    url: "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=2000&auto=format&fit=crop",
-    title: "The Great Wave",
-    artist: "Katsushika Hokusai"
+    url: "https://images.unsplash.com/photo-1505118380757-91f5f45d8de4?q=80&w=2000&auto=format&fit=crop",
+    title: "Tropical Shore",
+    location: "Maldives"
   },
   {
-    url: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?q=80&w=2000&auto=format&fit=crop",
-    title: "Mona Lisa",
-    artist: "Leonardo da Vinci"
+    url: "https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?q=80&w=2000&auto=format&fit=crop",
+    title: "Golden Desert",
+    location: "Sahara"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2000&auto=format&fit=crop",
+    title: "Misty Valley",
+    location: "Highlands"
   }
-];
-
-export const SOMAFM_CHANNELS = [
-  { name: "Groove Salad", id: "groovesalad", url: "https://somafm.com/groovesalad130.mp3" },
-  { name: "Deep Space One", id: "deepspaceone", url: "https://somafm.com/deepspaceone130.mp3" },
-  { name: "Drone Zone", id: "dronezone", url: "https://somafm.com/dronezone130.mp3" },
-  { name: "Lush", id: "lush", url: "https://somafm.com/lush130.mp3" }
 ];

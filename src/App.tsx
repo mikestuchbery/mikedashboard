@@ -18,10 +18,14 @@ type AppMode = 'focus' | 'planning';
 
 export default function App() {
   const [artIndex, setArtIndex] = useState(0);
+  const [artLoading, setArtLoading] = useState(true);
+  const [artError, setArtError] = useState(false);
   const [isFullContent, setIsFullContent] = useState(true);
   const [mode, setMode] = useState<AppMode>('focus');
 
   const nextArt = () => {
+    setArtLoading(true);
+    setArtError(false);
     setArtIndex((prev) => (prev + 1) % CLASSIC_ART_COLLECTION.length);
   };
 
@@ -33,20 +37,30 @@ export default function App() {
       <AnimatePresence mode="wait">
         <motion.div
           key={artIndex}
-          initial={{ opacity: 0, scale: 1.1 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 2, ease: "easeInOut" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.5 }}
           className="absolute inset-0 z-0"
         >
-          <div className="absolute inset-0 bg-black/40 z-10" />
+          {/* Fallback color if image fails */}
+          <div className="absolute inset-0 bg-zinc-900 z-0" />
+          
           <img
             src={currentArt.url}
             alt={currentArt.title}
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover transition-opacity duration-1000 ${artLoading ? 'opacity-0' : 'opacity-100'}`}
             referrerPolicy="no-referrer"
+            onLoad={() => setArtLoading(false)}
+            onError={() => {
+              console.error(`Failed to load art: ${currentArt.title}`);
+              setArtLoading(false);
+              setArtError(true);
+            }}
           />
+          
           {/* Vignette & Gradient Overlays */}
+          <div className="absolute inset-0 bg-black/40 z-10" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_rgba(0,0,0,0.6)_100%)] z-10" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80 z-10" />
         </motion.div>
@@ -62,8 +76,11 @@ export default function App() {
             </h1>
             <div className="flex items-center gap-2 mt-2">
               <span className="text-[10px] uppercase tracking-widest text-white/40 font-bold">Background</span>
-              <span className="text-[10px] uppercase tracking-widest text-white/80 font-bold">{currentArt.title}</span>
-              <span className="text-[10px] text-white/20 ml-2">— {currentArt.artist}</span>
+              <span className="text-[10px] uppercase tracking-widest text-white/80 font-bold">
+                {artError ? "Art Load Failed" : currentArt.title}
+              </span>
+              {!artError && <span className="text-[10px] text-white/20 ml-2">— {currentArt.artist}</span>}
+              {artLoading && <span className="w-2 h-2 rounded-full bg-white/20 animate-pulse ml-2" />}
             </div>
           </div>
           <Clock />

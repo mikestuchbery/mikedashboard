@@ -19,11 +19,22 @@ import { Task, TaskStatus } from '../constants';
 
 export const PlanningDashboard: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>(() => {
-    const saved = localStorage.getItem('mike-kanban-tasks');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('mike-kanban-tasks');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      console.error("Failed to load tasks from localStorage", e);
+      return [];
+    }
   });
   const [taskInput, setTaskInput] = useState('');
-  const [notes, setNotes] = useState(() => localStorage.getItem('mike-strategy-notes') || '');
+  const [notes, setNotes] = useState(() => {
+    try {
+      return localStorage.getItem('mike-strategy-notes') || '';
+    } catch (e) {
+      return '';
+    }
+  });
   const [isCalendarConnected, setIsCalendarConnected] = useState(false);
 
   useEffect(() => {
@@ -86,6 +97,12 @@ export const PlanningDashboard: React.FC = () => {
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
+  const clearCompleted = () => {
+    if (confirm("Are you sure you want to clear all completed tasks?")) {
+      setTasks(tasks.filter(t => t.status !== 'completed'));
+    }
+  };
+
   const columns: { id: TaskStatus; label: string; icon: any; color: string }[] = [
     { id: 'daily', label: 'Daily Entry', icon: Plus, color: 'text-blue-400' },
     { id: 'in-progress', label: 'In Progress', icon: Clock, color: 'text-yellow-400' },
@@ -127,12 +144,20 @@ export const PlanningDashboard: React.FC = () => {
           </div>
         </div>
 
-        <button 
-          onClick={exportSummary}
-          className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl text-white text-sm font-medium transition-all"
-        >
-          <Download className="w-4 h-4" /> Export End of Day
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={clearCompleted}
+            className="flex items-center gap-2 px-6 py-3 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-2xl text-red-400 text-sm font-medium transition-all"
+          >
+            <Trash2 className="w-4 h-4" /> Clear Completed
+          </button>
+          <button 
+            onClick={exportSummary}
+            className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl text-white text-sm font-medium transition-all"
+          >
+            <Download className="w-4 h-4" /> Export End of Day
+          </button>
+        </div>
       </div>
 
       {/* Kanban Board */}

@@ -17,24 +17,29 @@ export type TimerMode = 'focus' | 'shortBreak' | 'longBreak';
 
 export const CLASSIC_ART_COLLECTION = [
   {
-    url: "https://images.unsplash.com/photo-1576016770956-debb63d9df05?auto=format&fit=crop&q=80&w=2000",
+    url: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=2000&auto=format&fit=crop",
     title: "The Milkmaid",
     artist: "Johannes Vermeer (Rijksmuseum)"
   },
   {
-    url: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&q=80&w=2000",
-    title: "Self-Portrait with Bandaged Ear",
+    url: "https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?q=80&w=2000&auto=format&fit=crop",
+    title: "Self-Portrait",
     artist: "Vincent van Gogh (Courtauld Gallery)"
   },
   {
-    url: "https://images.unsplash.com/photo-1580136608260-42d1c470186d?auto=format&fit=crop&q=80&w=2000",
-    title: "The Great Wave off Kanagawa",
-    artist: "Katsushika Hokusai (Metropolitan Museum of Art)"
+    url: "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?q=80&w=2000&auto=format&fit=crop",
+    title: "The Great Wave",
+    artist: "Katsushika Hokusai (Met)"
   },
   {
-    url: "https://images.unsplash.com/photo-1578301978018-3005759f48f7?auto=format&fit=crop&q=80&w=2000",
+    url: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?q=80&w=2000&auto=format&fit=crop",
     title: "Mona Lisa",
-    artist: "Leonardo da Vinci (Louvre Museum)"
+    artist: "Leonardo da Vinci (Louvre)"
+  },
+  {
+    url: "https://images.unsplash.com/photo-1543857778-c4a1a3e0b2eb?q=80&w=2000&auto=format&fit=crop",
+    title: "Starry Night",
+    artist: "Vincent van Gogh (MoMA)"
   }
 ];
 

@@ -5,8 +5,12 @@ let aiInstance: GoogleGenAI | null = null;
 function getAI() {
   if (!aiInstance) {
     const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
-      throw new Error("Gemini API key is not configured.");
+    if (!apiKey || apiKey === "MY_GEMINI_API_KEY" || apiKey === "") {
+      // If we're in a browser and it's missing, we might be waiting for injection
+      // or it might truly be missing. We'll try to use it anyway if it's not the placeholder.
+      if (!apiKey || apiKey === "MY_GEMINI_API_KEY" || apiKey === "") {
+         throw new Error("Gemini API key is not configured. Please set GEMINI_API_KEY in your environment.");
+      }
     }
     aiInstance = new GoogleGenAI({ apiKey });
   }
@@ -36,7 +40,12 @@ export async function getHistoricalQuotes() {
       }
     });
 
-    return JSON.parse(response.text);
+    try {
+      return JSON.parse(response.text || "[]");
+    } catch (parseError) {
+      console.error("Failed to parse Gemini response as JSON", parseError);
+      throw parseError;
+    }
   } catch (e) {
     console.error("Failed to fetch quotes", e);
     // Return fallback quotes so the app doesn't crash

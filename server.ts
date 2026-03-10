@@ -25,7 +25,8 @@ async function startServer() {
   // OAuth URL generation
   app.get("/api/auth/google/url", (req, res) => {
     const clientId = process.env.GOOGLE_CLIENT_ID;
-    const redirectUri = `${process.env.APP_URL}/auth/google/callback`;
+    const appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
+    const redirectUri = `${appUrl}/auth/google/callback`;
     
     if (!clientId) {
       return res.status(400).json({ error: "GOOGLE_CLIENT_ID not configured" });

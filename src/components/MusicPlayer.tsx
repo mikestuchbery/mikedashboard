@@ -118,8 +118,8 @@ export const MusicPlayer: React.FC = () => {
               ref={audioRef} 
               src={currentSoma.url} 
               onEnded={() => setIsPlaying(false)}
-              onError={(e) => {
-                console.error("Audio error", e);
+              onError={() => {
+                console.error("Audio error: Failed to load source");
                 setIsPlaying(false);
               }}
             />

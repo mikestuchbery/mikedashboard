@@ -12,7 +12,7 @@ export const MusicPlayer: React.FC = () => {
       <div className="min-h-[160px]">
         <div className="flex flex-col gap-4">
           <iframe
-            src="https://open.spotify.com/embed/playlist/37i9dQZF1DWZeKHA6V9r9u?utm_source=generator&theme=0"
+            src="https://open.spotify.com/embed/playlist/37i9dQZF1DWWQRwui0Ex3M?utm_source=generator"
             width="100%"
             height="152"
             frameBorder="0"

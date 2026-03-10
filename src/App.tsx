@@ -50,7 +50,6 @@ export default function App() {
             src={currentArt.url}
             alt={currentArt.title}
             className={`w-full h-full object-cover transition-opacity duration-1000 ${artLoading ? 'opacity-0' : 'opacity-100'}`}
-            referrerPolicy="no-referrer"
             onLoad={() => setArtLoading(false)}
             onError={() => {
               console.error(`Failed to load art: ${currentArt.title}`);

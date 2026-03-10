@@ -10,10 +10,15 @@ export const QuoteDisplay: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchQuotes = async () => {
-    setLoading(true);
-    const data = await getHistoricalQuotes();
-    setQuotes(data);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const data = await getHistoricalQuotes();
+      setQuotes(data);
+    } catch (error) {
+      console.error("Quote fetch error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

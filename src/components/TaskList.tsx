@@ -20,7 +20,7 @@ export const TaskList: React.FC = () => {
     const newTask: Task = {
       id: crypto.randomUUID(),
       text: input.trim(),
-      completed: false,
+      status: 'daily',
       createdAt: Date.now(),
     };
     setTasks([newTask, ...tasks]);
@@ -28,7 +28,7 @@ export const TaskList: React.FC = () => {
   };
 
   const toggleTask = (id: string) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+    setTasks(tasks.map(t => t.id === id ? { ...t, status: t.status === 'completed' ? 'daily' : 'completed' } : t));
   };
 
   const deleteTask = (id: string) => {
@@ -39,7 +39,7 @@ export const TaskList: React.FC = () => {
     <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 flex flex-col h-full max-h-[500px]">
       <div className="flex items-center gap-2 mb-6">
         <ListTodo className="w-5 h-5 text-white/70" />
-        <h2 className="text-lg font-medium text-white">Tasks</h2>
+        <h2 className="text-lg font-medium text-white">Focus Tasks</h2>
       </div>
 
       <form onSubmit={addTask} className="relative mb-6">
@@ -71,12 +71,12 @@ export const TaskList: React.FC = () => {
               <button
                 onClick={() => toggleTask(task.id)}
                 className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
-                  task.completed ? 'bg-emerald-500 border-emerald-500' : 'border-white/30'
+                  task.status === 'completed' ? 'bg-emerald-500 border-emerald-500' : 'border-white/30'
                 }`}
               >
-                {task.completed && <Check className="w-3 h-3 text-white" />}
+                {task.status === 'completed' && <Check className="w-3 h-3 text-white" />}
               </button>
-              <span className={`flex-1 text-sm text-white/90 ${task.completed ? 'line-through opacity-50' : ''}`}>
+              <span className={`flex-1 text-sm text-white/90 ${task.status === 'completed' ? 'line-through opacity-50' : ''}`}>
                 {task.text}
               </span>
               <button

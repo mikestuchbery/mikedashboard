@@ -72,7 +72,7 @@ export const MusicPlayer: React.FC = () => {
         {activeTab === 'spotify' ? (
           <div className="flex flex-col gap-4">
             <iframe
-              src="https://open.spotify.com/embed/playlist/37i9dQZF1DWWQRwui0Ex7X?utm_source=generator&theme=0"
+              src="https://open.spotify.com/embed/playlist/37i9dQZF1DWZeKHA6V9r9u?utm_source=generator&theme=0"
               width="100%"
               height="152"
               frameBorder="0"

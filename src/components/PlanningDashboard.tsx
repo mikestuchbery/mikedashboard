@@ -1,160 +1,225 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Target, Zap, MessageSquare, Plus, Check, Trash2 } from 'lucide-react';
+import { 
+  Calendar, 
+  Target, 
+  Plus, 
+  Trash2, 
+  ChevronRight, 
+  ChevronLeft, 
+  AlertCircle, 
+  CheckCircle2, 
+  Clock, 
+  Download,
+  FileText,
+  ExternalLink
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format, addDays, startOfWeek } from 'date-fns';
-
-interface Goal {
-  id: string;
-  text: string;
-  completed: boolean;
-}
+import { Task, TaskStatus } from '../constants';
 
 export const PlanningDashboard: React.FC = () => {
-  const [goals, setGoals] = useState<Goal[]>(() => {
-    const saved = localStorage.getItem('mike-goals');
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    const saved = localStorage.getItem('mike-kanban-tasks');
     return saved ? JSON.parse(saved) : [];
   });
-  const [goalInput, setGoalInput] = useState('');
-  const [notes, setNotes] = useState(() => localStorage.getItem('mike-notes') || '');
+  const [taskInput, setTaskInput] = useState('');
+  const [notes, setNotes] = useState(() => localStorage.getItem('mike-strategy-notes') || '');
+  const [isCalendarConnected, setIsCalendarConnected] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('mike-goals', JSON.stringify(goals));
-  }, [goals]);
+    localStorage.setItem('mike-kanban-tasks', JSON.stringify(tasks));
+  }, [tasks]);
 
   useEffect(() => {
-    localStorage.setItem('mike-notes', notes);
+    localStorage.setItem('mike-strategy-notes', notes);
   }, [notes]);
 
-  const addGoal = (e: React.FormEvent) => {
+  const addTask = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!goalInput.trim()) return;
-    setGoals([...goals, { id: crypto.randomUUID(), text: goalInput.trim(), completed: false }]);
-    setGoalInput('');
+    if (!taskInput.trim()) return;
+    const newTask: Task = {
+      id: crypto.randomUUID(),
+      text: taskInput.trim(),
+      status: 'daily',
+      createdAt: Date.now(),
+    };
+    setTasks([...tasks, newTask]);
+    setTaskInput('');
   };
 
-  const toggleGoal = (id: string) => {
-    setGoals(goals.map(g => g.id === id ? { ...g, completed: !g.completed } : g));
+  const moveTask = (id: string, newStatus: TaskStatus) => {
+    setTasks(tasks.map(t => t.id === id ? { ...t, status: newStatus } : t));
   };
 
-  const deleteGoal = (id: string) => {
-    setGoals(goals.filter(g => g.id !== id));
+  const deleteTask = (id: string) => {
+    setTasks(tasks.filter(t => t.id !== id));
   };
+
+  const exportSummary = () => {
+    const summary = tasks.map(t => `[${t.status.toUpperCase()}] ${t.text}`).join('\n');
+    const blob = new Blob([`Mike's Strategy Summary - ${format(new Date(), 'PPP')}\n\n${summary}\n\nNotes:\n${notes}`], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `strategy-summary-${format(new Date(), 'yyyy-MM-dd')}.txt`;
+    a.click();
+  };
+
+  const connectCalendar = async () => {
+    try {
+      const res = await fetch('/api/auth/google/url');
+      const { url } = await res.json();
+      window.open(url, 'google_auth', 'width=600,height=700');
+    } catch (e) {
+      console.error("Auth failed", e);
+    }
+  };
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'GOOGLE_AUTH_SUCCESS') {
+        setIsCalendarConnected(true);
+        // In a real app, you'd fetch events here
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  const columns: { id: TaskStatus; label: string; icon: any; color: string }[] = [
+    { id: 'daily', label: 'Daily Entry', icon: Plus, color: 'text-blue-400' },
+    { id: 'in-progress', label: 'In Progress', icon: Clock, color: 'text-yellow-400' },
+    { id: 'blocked', label: 'Blocked', icon: AlertCircle, color: 'text-red-400' },
+    { id: 'completed', label: 'Completed', icon: CheckCircle2, color: 'text-emerald-400' },
+  ];
 
   const weekStart = startOfWeek(new Date());
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   return (
-    <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8">
-      {/* Weekly Overview */}
-      <div className="lg:col-span-8 flex flex-col gap-6">
-        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Calendar className="w-5 h-5 text-white/70" />
-            <h2 className="text-lg font-medium text-white">Weekly Overview</h2>
-          </div>
-          <div className="grid grid-cols-7 gap-2">
-            {weekDays.map((day) => {
-              const isToday = format(day, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
-              return (
-                <div 
-                  key={day.toString()} 
-                  className={`flex flex-col items-center p-3 rounded-2xl border transition-all ${
-                    isToday ? 'bg-white text-black border-white' : 'bg-white/5 border-white/5 text-white/60'
-                  }`}
-                >
-                  <span className="text-[10px] uppercase font-bold tracking-tighter opacity-60">
-                    {format(day, 'EEE')}
-                  </span>
-                  <span className="text-lg font-light tracking-tighter">
-                    {format(day, 'd')}
-                  </span>
-                </div>
-              );
-            })}
+    <div className="w-full max-w-7xl flex flex-col gap-8">
+      {/* Top Bar: Calendar & Export */}
+      <div className="flex flex-wrap justify-between items-center gap-4">
+        <div className="flex items-center gap-4">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 flex items-center gap-6">
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase font-bold text-white/40">Work Calendar</span>
+              <span className="text-sm text-white font-medium">
+                {isCalendarConnected ? "Connected to Google" : "Not Connected"}
+              </span>
+            </div>
+            {!isCalendarConnected ? (
+              <button 
+                onClick={connectCalendar}
+                className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-xl text-xs font-bold hover:scale-105 transition-transform"
+              >
+                <ExternalLink className="w-3 h-3" /> Connect
+              </button>
+            ) : (
+              <div className="flex gap-1">
+                {weekDays.map(d => (
+                  <div key={d.toString()} className="w-6 h-6 rounded-md bg-white/10 flex items-center justify-center text-[8px] text-white/60">
+                    {format(d, 'd')}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 flex-1 flex flex-col">
-          <div className="flex items-center gap-2 mb-6">
-            <MessageSquare className="w-5 h-5 text-white/70" />
-            <h2 className="text-lg font-medium text-white">Brain Dump / Notes</h2>
-          </div>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Capture thoughts, ideas, or reminders..."
-            className="w-full flex-1 bg-black/20 border border-white/10 rounded-2xl p-4 text-white placeholder:text-white/20 focus:outline-none focus:border-white/30 transition-colors resize-none font-serif italic text-lg leading-relaxed"
-          />
-        </div>
+        <button 
+          onClick={exportSummary}
+          className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl text-white text-sm font-medium transition-all"
+        >
+          <Download className="w-4 h-4" /> Export End of Day
+        </button>
       </div>
 
-      {/* Goals & Priorities */}
-      <div className="lg:col-span-4 flex flex-col gap-6">
-        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 flex flex-col">
-          <div className="flex items-center gap-2 mb-6">
-            <Target className="w-5 h-5 text-white/70" />
-            <h2 className="text-lg font-medium text-white">Big Goals</h2>
-          </div>
-          
-          <form onSubmit={addGoal} className="relative mb-4">
-            <input
-              type="text"
-              value={goalInput}
-              onChange={(e) => setGoalInput(e.target.value)}
-              placeholder="Set a new goal..."
-              className="w-full bg-black/20 border border-white/10 rounded-xl py-2 px-4 text-sm text-white placeholder:text-white/30 focus:outline-none"
-            />
-            <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-white/40 hover:text-white">
-              <Plus className="w-4 h-4" />
-            </button>
-          </form>
+      {/* Kanban Board */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {columns.map((col) => (
+          <div key={col.id} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-4 flex flex-col min-h-[400px]">
+            <div className="flex items-center justify-between mb-4 px-2">
+              <div className="flex items-center gap-2">
+                <col.icon className={`w-4 h-4 ${col.color}`} />
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">{col.label}</h3>
+              </div>
+              <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded-full text-white/60">
+                {tasks.filter(t => t.status === col.id).length}
+              </span>
+            </div>
 
-          <div className="space-y-2">
-            <AnimatePresence>
-              {goals.map((goal) => (
-                <motion.div
-                  key={goal.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5 group"
-                >
-                  <button 
-                    onClick={() => toggleGoal(goal.id)}
-                    className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                      goal.completed ? 'bg-emerald-500 border-emerald-500' : 'border-white/30'
-                    }`}
+            {col.id === 'daily' && (
+              <form onSubmit={addTask} className="mb-4">
+                <input
+                  type="text"
+                  value={taskInput}
+                  onChange={(e) => setTaskInput(e.target.value)}
+                  placeholder="New daily task..."
+                  className="w-full bg-black/20 border border-white/10 rounded-xl py-2 px-3 text-xs text-white placeholder:text-white/20 focus:outline-none"
+                />
+              </form>
+            )}
+
+            <div className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-1">
+              <AnimatePresence initial={false}>
+                {tasks.filter(t => t.status === col.id).map((task) => (
+                  <motion.div
+                    key={task.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="group bg-white/5 border border-white/5 p-3 rounded-xl hover:border-white/20 transition-all"
                   >
-                    {goal.completed && <Check className="w-2 h-2 text-white" />}
-                  </button>
-                  <span className={`flex-1 text-xs text-white/80 ${goal.completed ? 'line-through opacity-40' : ''}`}>
-                    {goal.text}
-                  </span>
-                  <button onClick={() => deleteGoal(goal.id)} className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-400">
-                    <Trash2 className="w-3 h-3" />
-                  </button>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+                    <p className="text-xs text-white/90 mb-3 leading-relaxed">{task.text}</p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex gap-1">
+                        {col.id !== 'daily' && (
+                          <button onClick={() => moveTask(task.id, 'daily')} className="p-1 hover:bg-white/10 rounded text-white/40"><ChevronLeft className="w-3 h-3" /></button>
+                        )}
+                        {col.id === 'daily' && (
+                          <button onClick={() => moveTask(task.id, 'in-progress')} className="p-1 hover:bg-white/10 rounded text-white/40"><ChevronRight className="w-3 h-3" /></button>
+                        )}
+                        {col.id === 'in-progress' && (
+                          <>
+                            <button onClick={() => moveTask(task.id, 'blocked')} className="p-1 hover:bg-white/10 rounded text-red-400/40"><AlertCircle className="w-3 h-3" /></button>
+                            <button onClick={() => moveTask(task.id, 'completed')} className="p-1 hover:bg-white/10 rounded text-emerald-400/40"><CheckCircle2 className="w-3 h-3" /></button>
+                          </>
+                        )}
+                        {col.id === 'blocked' && (
+                          <button onClick={() => moveTask(task.id, 'in-progress')} className="p-1 hover:bg-white/10 rounded text-white/40"><Clock className="w-3 h-3" /></button>
+                        )}
+                      </div>
+                      <button onClick={() => deleteTask(task.id)} className="opacity-0 group-hover:opacity-100 p-1 text-white/20 hover:text-red-400 transition-opacity">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
           </div>
-        </div>
+        ))}
+      </div>
 
-        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Zap className="w-5 h-5 text-white/70" />
-            <h2 className="text-lg font-medium text-white">Priority Matrix</h2>
+      {/* Strategy Scratchpad */}
+      <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 flex flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <FileText className="w-6 h-6 text-white/70" />
+            <h2 className="text-xl font-medium text-white">Strategy Scratchpad</h2>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20">
-              <span className="text-[8px] uppercase font-bold text-red-400 block mb-1">Urgent</span>
-              <span className="text-[10px] text-white/60 italic">Do it now</span>
-            </div>
-            <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
-              <span className="text-[8px] uppercase font-bold text-blue-400 block mb-1">Important</span>
-              <span className="text-[10px] text-white/60 italic">Schedule it</span>
-            </div>
+          <div className="flex gap-2">
+            <span className="text-[10px] uppercase tracking-widest text-white/40 font-bold">Auto-saving</span>
           </div>
         </div>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Map out your long-term vision, pivot points, and strategic breakthroughs..."
+          className="w-full min-h-[300px] bg-black/20 border border-white/10 rounded-2xl p-6 text-white placeholder:text-white/10 focus:outline-none focus:border-white/30 transition-colors resize-none font-serif italic text-xl leading-relaxed"
+        />
       </div>
     </div>
   );
